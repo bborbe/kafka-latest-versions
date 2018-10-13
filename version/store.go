@@ -5,6 +5,7 @@
 package version
 
 import (
+	"strings"
 	"sync"
 
 	"github.com/bborbe/kafka-latest-versions/avro"
@@ -24,6 +25,10 @@ func (s *Store) AddVersion(new avro.Version) {
 		s.latestVersions = make(map[string]avro.Version)
 	}
 
+	if strings.Contains(new.Number, "alpha") || strings.Contains(new.Number, "beta") {
+		return
+	}
+
 	current, found := s.latestVersions[new.App]
 	if !found {
 		s.latestVersions[new.App] = new
@@ -35,9 +40,14 @@ func (s *Store) AddVersion(new avro.Version) {
 }
 
 func (s *Store) Latest() []avro.Version {
-	var result []avro.Version
 	s.mux.Lock()
 	defer s.mux.Unlock()
+
+	if s.latestVersions == nil {
+		s.latestVersions = make(map[string]avro.Version)
+	}
+
+	var result []avro.Version
 	for _, v := range s.latestVersions {
 		result = append(result, v)
 	}

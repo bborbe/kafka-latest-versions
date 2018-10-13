@@ -38,6 +38,26 @@ func TestStore(t *testing.T) {
 	}
 
 	versionStore.AddVersion(avro.Version{
+		App: "world", Number: "2.0.0-alpha",
+	})
+	if len(versionStore.Latest()) != 1 {
+		t.Fatal("len should be 1")
+	}
+	if versionStore.Latest()[0].Number != "1.0.0" {
+		t.Fatal("should be versin 1.0.0")
+	}
+
+	versionStore.AddVersion(avro.Version{
+		App: "world", Number: "2.0.0-beta",
+	})
+	if len(versionStore.Latest()) != 1 {
+		t.Fatal("len should be 1")
+	}
+	if versionStore.Latest()[0].Number != "1.0.0" {
+		t.Fatal("should be versin 1.0.0")
+	}
+
+	versionStore.AddVersion(avro.Version{
 		App: "world", Number: "1.1.0",
 	})
 	if len(versionStore.Latest()) != 1 {
