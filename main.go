@@ -17,7 +17,6 @@ import (
 	"github.com/bborbe/kafka-latest-versions/avro"
 	"github.com/bborbe/kafka-latest-versions/version"
 	"github.com/bborbe/run"
-	"github.com/boltdb/bolt"
 	"github.com/golang/glog"
 	"github.com/gorilla/mux"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
@@ -30,14 +29,15 @@ func main() {
 	runtime.GOMAXPROCS(runtime.NumCPU())
 
 	versionUpdates := make(chan avro.Version, runtime.NumCPU())
-
 	kafkaConsumer := &consumer.SimpleConsumer{
 		MessageHandler: &version.MessageHandler{
 			VersionUpdates: versionUpdates,
 		},
 	}
-	versionStore := &version.Store{
+	versionStore := &version.Store{}
+	versionImporter := &version.Importer{
 		VersionUpdates: versionUpdates,
+		Store:          versionStore,
 	}
 
 	flag.StringVar(&kafkaConsumer.KafkaBrokers, "kafka-brokers", "", "kafka brokers")
@@ -56,7 +56,8 @@ func main() {
 
 	ctx, cancel := context.WithCancel(contextWithSig(context.Background()))
 	go func() {
-		err := versionStore.Import(ctx)
+
+		err := versionImporter.Import(ctx)
 		if err != nil {
 			glog.Warningf("import versions failed: %v", err)
 			cancel()
@@ -109,52 +110,4 @@ func contextWithSig(ctx context.Context) context.Context {
 	}()
 
 	return ctxWithCancel
-}
-
-func b() {
-	db, err := bolt.Open("accounts.db", 0600, nil)
-	if err != nil {
-		glog.Fatal(err)
-	}
-	defer db.Close()
-
-	// read offset from bold
-	// read version topic
-	// save read data to bolt
-	// save offset to bold
-
-	// rest endpoint sprint latest versions
-
-	id := "123"
-	bucket := "AccountBucket"
-
-	err = db.Update(func(tx *bolt.Tx) error {
-		_, err := tx.CreateBucketIfNotExists([]byte(bucket))
-		if err != nil {
-			return fmt.Errorf("create bucket failed: %s", err)
-		}
-		return nil
-	})
-	if err != nil {
-		glog.Fatal(err)
-	}
-
-	err = db.Update(func(tx *bolt.Tx) error {
-		b := tx.Bucket([]byte(bucket))
-		return b.Put([]byte(id), []byte("hello world"))
-	})
-	if err != nil {
-		glog.Fatal(err)
-	}
-
-	err = db.View(func(tx *bolt.Tx) error {
-		b := tx.Bucket([]byte(bucket))
-		content := b.Get([]byte(id))
-		os.Stdout.Write(content)
-		return nil
-	})
-	if err != nil {
-		glog.Fatal(err)
-	}
-
 }

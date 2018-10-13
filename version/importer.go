@@ -5,29 +5,25 @@
 package version
 
 import (
-	"bytes"
 	"context"
 
-	"github.com/Shopify/sarama"
 	"github.com/bborbe/kafka-latest-versions/avro"
-	"github.com/pkg/errors"
-	"github.com/seibert-media/go-kafka/schema"
 )
 
-type MessageHandler struct {
-	VersionUpdates chan<- avro.Version
+type Importer struct {
+	VersionUpdates <-chan avro.Version
+	Store          interface {
+		AddVersion(new avro.Version)
+	}
 }
 
-func (b *MessageHandler) ConsumeMessage(ctx context.Context, msg *sarama.ConsumerMessage) error {
-	value := bytes.NewBuffer(msg.Value)
-	err := schema.RemoveMagicHeader(value)
-	if err != nil {
-		return errors.Wrap(err, "remove magic headers failed")
+func (i *Importer) Import(ctx context.Context) error {
+	for {
+		select {
+		case new := <-i.VersionUpdates:
+			i.Store.AddVersion(new)
+		case <-ctx.Done():
+			return nil
+		}
 	}
-	version, err := avro.DeserializeVersion(value)
-	if err != nil {
-		return errors.Wrap(err, "deserialize version failed")
-	}
-	b.VersionUpdates <- *version
-	return nil
 }

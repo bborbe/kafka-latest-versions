@@ -5,7 +5,6 @@
 package version
 
 import (
-	"context"
 	"sync"
 
 	"github.com/bborbe/kafka-latest-versions/avro"
@@ -13,37 +12,24 @@ import (
 )
 
 type Store struct {
-	VersionUpdates <-chan avro.Version
-
 	mux            sync.Mutex
 	latestVersions map[string]avro.Version
 }
 
-func (s *Store) Import(ctx context.Context) error {
+func (s *Store) AddVersion(new avro.Version) {
 	s.mux.Lock()
+	defer s.mux.Unlock()
+
 	if s.latestVersions == nil {
 		s.latestVersions = make(map[string]avro.Version)
 	}
-	s.mux.Unlock()
-	for {
-		select {
-		case new := <-s.VersionUpdates:
-			s.importVersion(new)
-		case <-ctx.Done():
-			return nil
-		}
-	}
-}
 
-func (s *Store) importVersion(new avro.Version) {
-	s.mux.Lock()
-	defer s.mux.Unlock()
 	current, found := s.latestVersions[new.App]
 	if !found {
 		s.latestVersions[new.App] = new
 		return
 	}
-	if version.GreaterThan(version.Version(new.Number), version.Version(current.Number)) {
+	if version.Version(current.Number).Less(version.Version(new.Number)) {
 		s.latestVersions[new.App] = new
 	}
 }

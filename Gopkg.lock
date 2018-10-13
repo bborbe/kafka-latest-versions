@@ -38,11 +38,11 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:027ea4f0f3664de02738b55fafee01df55c35fe6fccd2a79821ffce22407903b"
+  digest = "1:78ae5d3b3b18a1752f217095ed1c3f5423de2d579d3bf8b91cc7fe13fe346174"
   name = "github.com/bborbe/version"
   packages = ["."]
   pruneopts = "UT"
-  revision = "f39213fc02ad87721f68154a042c83bee2f93948"
+  revision = "5e0804292d1de722a5e577ebec6485d18285f78e"
 
 [[projects]]
   branch = "master"
