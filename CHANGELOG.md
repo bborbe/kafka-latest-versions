@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+## 1.2.0
+
+- Add Bolt persistence
+
 ## 1.1.0
 
 - Ignore alpha and beta versions

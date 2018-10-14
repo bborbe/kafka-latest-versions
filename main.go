@@ -6,21 +6,14 @@ package main
 
 import (
 	"context"
-	"fmt"
-	"net/http"
 	"os"
 	"os/signal"
 	"runtime"
 	"syscall"
 
 	flag "github.com/bborbe/flagenv"
-	"github.com/bborbe/kafka-latest-versions/avro"
 	"github.com/bborbe/kafka-latest-versions/version"
-	"github.com/bborbe/run"
 	"github.com/golang/glog"
-	"github.com/gorilla/mux"
-	"github.com/prometheus/client_golang/prometheus/promhttp"
-	"github.com/seibert-media/go-kafka/consumer"
 )
 
 func main() {
@@ -28,68 +21,29 @@ func main() {
 	glog.CopyStandardLogTo("info")
 	runtime.GOMAXPROCS(runtime.NumCPU())
 
-	versionUpdates := make(chan avro.Version, runtime.NumCPU())
-	kafkaConsumer := &consumer.SimpleConsumer{
-		MessageHandler: &version.MessageHandler{
-			VersionUpdates: versionUpdates,
-		},
-	}
-	versionStore := &version.Store{}
-	versionImporter := &version.Importer{
-		VersionUpdates: versionUpdates,
-		Store:          versionStore,
-	}
-
-	flag.StringVar(&kafkaConsumer.KafkaBrokers, "kafka-brokers", "", "kafka brokers")
-	flag.StringVar(&kafkaConsumer.KafkaTopic, "kafka-topic", "", "kafka topic")
-	portPtr := flag.Int("port", 9001, "port to listen")
+	app := &version.App{}
+	flag.StringVar(&app.DataDir, "datadir", "", "data directory")
+	flag.StringVar(&app.KafkaBrokers, "kafka-brokers", "", "kafka brokers")
+	flag.StringVar(&app.KafkaTopic, "kafka-topic", "", "kafka topic")
+	flag.IntVar(&app.Port, "port", 9001, "port to listen")
 
 	flag.Set("logtostderr", "true")
 	flag.Parse()
 
-	if kafkaConsumer.KafkaBrokers == "" {
-		glog.Exitf("KafkaBrokers missing")
+	glog.V(0).Infof("Parameter datadir: %s", app.DataDir)
+	glog.V(0).Infof("Parameter kafka-brokers: %s", app.KafkaBrokers)
+	glog.V(0).Infof("Parameter kafka-topic: %s", app.KafkaTopic)
+	glog.V(0).Infof("Parameter port: %d", app.Port)
+
+	err := app.Validate()
+	if err != nil {
+		glog.Exit(err)
 	}
-	if kafkaConsumer.KafkaTopic == "" {
-		glog.Exitf("KafkaTopic missing")
-	}
 
-	ctx, cancel := context.WithCancel(contextWithSig(context.Background()))
-	go func() {
-
-		err := versionImporter.Import(ctx)
-		if err != nil {
-			glog.Warningf("import versions failed: %v", err)
-			cancel()
-		}
-	}()
-
-	router := mux.NewRouter()
-	router.Handle("/metrics", promhttp.Handler())
-	router.HandleFunc("/", func(resp http.ResponseWriter, req *http.Request) {
-		resp.Header().Set("Content-Type", "text/plain")
-		resp.WriteHeader(http.StatusOK)
-		for _, v := range versionStore.Latest() {
-			fmt.Fprintf(resp, "%s = %s\n", v.App, v.Number)
-		}
-	})
-
-	runServer := func(ctx context.Context) error {
-		server := &http.Server{
-			Addr:    fmt.Sprintf(":%d", *portPtr),
-			Handler: router,
-		}
-		go func() {
-			select {
-			case <-ctx.Done():
-				server.Shutdown(ctx)
-			}
-		}()
-		return server.ListenAndServe()
-	}
+	ctx := contextWithSig(context.Background())
 
 	glog.V(0).Infof("app started")
-	if err := run.CancelOnFirstFinish(ctx, kafkaConsumer.Consume, runServer); err != nil {
+	if err := app.Run(ctx); err != nil {
 		glog.Exitf("app failed: %+v", err)
 	}
 	glog.V(0).Infof("app finished")
