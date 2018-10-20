@@ -51,15 +51,15 @@ func (f *OffsetMessageHandler) HandleMessage(partition int32, msg *sarama.Consum
 		if err := schema.RemoveMagicHeader(buf); err != nil {
 			return errors.Wrap(err, "remove magic headers failed")
 		}
-		new, err := avro.DeserializeVersion(buf)
+		new, err := avro.DeserializeApplicationVersionAvailable(buf)
 		if err != nil {
 			return errors.Wrap(err, "deserialize version failed")
 		}
-		if strings.Contains(new.Number, "alpha") || strings.Contains(new.Number, "beta") {
+		if strings.Contains(new.Version, "alpha") || strings.Contains(new.Version, "beta") {
 			return nil
 		}
 		current, _ := versionRegistry.Get(new.App)
-		if current == nil || version.Version(current.Number).Less(version.Version(new.Number)) {
+		if current == nil || version.Version(current.Version).Less(version.Version(new.Version)) {
 			err := versionRegistry.Set(*new)
 			if err != nil {
 				return err

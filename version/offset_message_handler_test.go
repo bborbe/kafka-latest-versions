@@ -6,19 +6,14 @@ package version_test
 
 import (
 	"bytes"
-
-	"github.com/Shopify/sarama"
-
-	//"github.com/Shopify/sarama"
-	"io/ioutil"
-	"os"
-
+	"github.com/Shopify/sarama" //"github.com/Shopify/sarama"
 	"github.com/bborbe/kafka-latest-versions/avro"
-
 	"github.com/bborbe/kafka-latest-versions/version"
 	"github.com/boltdb/bolt"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+	"io/ioutil"
+	"os"
 )
 
 var _ = Describe("OffsetMessageHandler", func() {
@@ -50,9 +45,9 @@ var _ = Describe("OffsetMessageHandler", func() {
 		Expect(offset).To(Equal(int64(-2)))
 	})
 	It("handles message", func() {
-		v := &avro.Version{
+		v := &avro.ApplicationVersionAvailable{
 			App:    "world",
-			Number: "1.2.3",
+			Version: "1.2.3",
 		}
 		buf := bytes.NewBuffer(make([]byte, 5))
 		err := v.Serialize(buf)
@@ -75,7 +70,7 @@ var _ = Describe("OffsetMessageHandler", func() {
 			version, err := versionRegistry.Get("world")
 			Expect(err).To(BeNil())
 			Expect(version.App).To(Equal("world"))
-			Expect(version.Number).To(Equal("1.2.3"))
+			Expect(version.Version).To(Equal("1.2.3"))
 			return nil
 		})
 	})

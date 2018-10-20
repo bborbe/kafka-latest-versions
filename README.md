@@ -7,7 +7,7 @@ Print latest versions of each application seen
 ```bash
 go run main.go \
 -kafka-brokers=kafka:9092 \
--kafka-topic=versions \
+-kafka-topic=application-version-available \
 -datadir=/tmp \
 -v=2
 ```

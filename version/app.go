@@ -81,8 +81,8 @@ func (a *App) Run(ctx context.Context) error {
 			versionRegistry := VersionRegistry{
 				Tx: tx,
 			}
-			return versionRegistry.ForEach(func(version avro.Version) error {
-				fmt.Fprintf(resp, "%s = %s\n", version.App, version.Number)
+			return versionRegistry.ForEach(func(version avro.ApplicationVersionAvailable) error {
+				fmt.Fprintf(resp, "%s = %s\n", version.App, version.Version)
 				return nil
 			})
 		})

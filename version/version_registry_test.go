@@ -47,7 +47,7 @@ var _ = Describe("VersionRegistry", func() {
 	It("saves version", func() {
 		db.Update(func(tx *bolt.Tx) error {
 			versionRegistry := version.VersionRegistry{Tx: tx}
-			versionRegistry.Set(avro.Version{App: "world", Number: "1.2.3"})
+			versionRegistry.Set(avro.ApplicationVersionAvailable{App: "world", Version: "1.2.3"})
 			return nil
 		})
 		db.View(func(tx *bolt.Tx) error {
@@ -55,7 +55,7 @@ var _ = Describe("VersionRegistry", func() {
 			version, err := versionRegistry.Get("world")
 			Expect(err).To(BeNil())
 			Expect(version.App).To(Equal("world"))
-			Expect(version.Number).To(Equal("1.2.3"))
+			Expect(version.Version).To(Equal("1.2.3"))
 			return nil
 		})
 	})
