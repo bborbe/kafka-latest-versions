@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+## 1.3.0
+
+- Ignore message handling errors
+
 ## 1.2.0
 
 - Add Bolt persistence

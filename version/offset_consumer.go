@@ -89,8 +89,6 @@ func (o *OffsetConsumer) Consume(ctx context.Context) error {
 					}
 					if err := o.OffsetManager.HandleMessage(partition, msg); err != nil {
 						glog.Warningf("handle message failed %v", err)
-						cancel()
-						return
 					}
 					glog.V(2).Infof("message %d consumed successful", msg.Offset)
 				}
