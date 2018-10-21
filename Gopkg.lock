@@ -11,11 +11,11 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:936d21455d9f0c5cfa8f15f60b9606a9b54f1f251c2a72cc2f8f2197d0e211dd"
+  digest = "1:a5a7d0b0cda13e9cef2e025a1cca547b6409b38bd7cbbadc39d1de829b592381"
   name = "github.com/bborbe/flagenv"
   packages = ["."]
   pruneopts = "UT"
-  revision = "121c0cff072d7535484fc4a6163d9a4fefb07f58"
+  revision = "2956c4545608fea556c77ca58fcb1cda499defff"
 
 [[projects]]
   branch = "master"
@@ -222,15 +222,16 @@
   version = "v0.8.0"
 
 [[projects]]
-  digest = "1:d14a5f4bfecf017cb780bdde1b6483e5deb87e12c332544d2c430eda58734bcb"
+  digest = "1:20a8a18488bdef471795af0413d9a3c9c35dc24ca93342329b884ba3c15cbaab"
   name = "github.com/prometheus/client_golang"
   packages = [
     "prometheus",
+    "prometheus/internal",
     "prometheus/promhttp",
   ]
   pruneopts = "UT"
-  revision = "c5b7fccd204277076155f10851dad72b76a49317"
-  version = "v0.8.0"
+  revision = "1cafe34db7fdec6022e17e00e1c1ea501022f3e4"
+  version = "v0.9.0"
 
 [[projects]]
   branch = "master"
@@ -242,7 +243,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:63b68062b8968092eb86bedc4e68894bd096ea6b24920faca8b9dcf451f54bb5"
+  digest = "1:db712fde5d12d6cdbdf14b777f0c230f4ff5ab0be8e35b239fc319953ed577a4"
   name = "github.com/prometheus/common"
   packages = [
     "expfmt",
@@ -250,7 +251,7 @@
     "model",
   ]
   pruneopts = "UT"
-  revision = "c7de2306084e37d54b8be01f3541a8464345e9a5"
+  revision = "7e9e6cabbd393fc208072eedef99188d0ce788b6"
 
 [[projects]]
   branch = "master"
@@ -267,19 +268,22 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:c4556a44e350b50a490544d9b06e9fba9c286c21d6c0e47f54f3a9214597298c"
+  digest = "1:d38f81081a389f1466ec98192cf9115a82158854d6f01e1c23e2e7554b97db71"
   name = "github.com/rcrowley/go-metrics"
   packages = ["."]
   pruneopts = "UT"
-  revision = "e2704e165165ec55d062f5919b4b29494e9fa790"
+  revision = "3113b8401b8a98917cde58f8bbd42a1b1c03b1fd"
 
 [[projects]]
   branch = "master"
-  digest = "1:ddaef4504d21ea7bb0876c8448adbcda9aeba877fc0760d8c680a75d020b05d6"
+  digest = "1:eca521b27a64d43abb6abd395a635d2d7d4a10d364ddf6fa831507c7751fc284"
   name = "github.com/seibert-media/go-kafka"
-  packages = ["schema"]
+  packages = [
+    "persistent",
+    "schema",
+  ]
   pruneopts = "UT"
-  revision = "f0a1ae13b667f34492ce7cc549923f0e45be49fb"
+  revision = "c2ea8ae9aa682934d77b7bd13e64002a225b725f"
 
 [[projects]]
   branch = "master"
@@ -291,15 +295,15 @@
     "html/charset",
   ]
   pruneopts = "UT"
-  revision = "49bb7cea24b1df9410e1712aa6433dae904ff66a"
+  revision = "04a2e542c03f1d053ab3e4d6e5abcd4b66e2be8e"
 
 [[projects]]
   branch = "master"
-  digest = "1:0a40b0bdd57a93e741d8557465be3a2edeec408e9b6399586ad65bbe8e355796"
+  digest = "1:be4f165c438aa39318fd5c8c180a95f4a52524641c0b714638b0fd9fd912b38d"
   name = "golang.org/x/sys"
   packages = ["unix"]
   pruneopts = "UT"
-  revision = "fa43e7bc11baaae89f3f902b2b4d832b68234844"
+  revision = "8e24a49d80f82323e1c4db1b5da3e0f31171a151"
 
 [[projects]]
   digest = "1:aa4d6967a3237f8367b6bf91503964a77183ecf696f1273e8ad3551bb4412b5f"
@@ -365,6 +369,7 @@
     "github.com/onsi/gomega",
     "github.com/pkg/errors",
     "github.com/prometheus/client_golang/prometheus/promhttp",
+    "github.com/seibert-media/go-kafka/persistent",
     "github.com/seibert-media/go-kafka/schema",
   ]
   solver-name = "gps-cdcl"

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package version
+package persistent
 
 import (
 	"context"
@@ -14,7 +14,7 @@ import (
 	"github.com/pkg/errors"
 )
 
-type OffsetConsumer struct {
+type Consumer struct {
 	KafkaBrokers  string
 	KafkaTopic    string
 	OffsetManager interface {
@@ -23,7 +23,7 @@ type OffsetConsumer struct {
 	}
 }
 
-func (o *OffsetConsumer) Consume(ctx context.Context) error {
+func (o *Consumer) Consume(ctx context.Context) error {
 	glog.V(0).Infof("import to %s started", o.KafkaTopic)
 
 	config := sarama.NewConfig()

@@ -2,20 +2,20 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package version_test
+package latestversion_test
 
 import (
 	"io/ioutil"
 	"os"
 
 	"github.com/bborbe/kafka-latest-versions/avro"
-	"github.com/bborbe/kafka-latest-versions/version"
+	"github.com/bborbe/kafka-latest-versions/latestversion"
 	"github.com/boltdb/bolt"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )
 
-var _ = Describe("VersionRegistry", func() {
+var _ = Describe("AvailableRegistry", func() {
 	var filename string
 	var db *bolt.DB
 	BeforeEach(func() {
@@ -36,7 +36,7 @@ var _ = Describe("VersionRegistry", func() {
 	})
 	It("return error if not exits", func() {
 		db.View(func(tx *bolt.Tx) error {
-			o := version.VersionRegistry{
+			o := latestversion.AvailableRegistry{
 				Tx: tx,
 			}
 			_, err := o.Get("foo")
@@ -46,12 +46,12 @@ var _ = Describe("VersionRegistry", func() {
 	})
 	It("saves version", func() {
 		db.Update(func(tx *bolt.Tx) error {
-			versionRegistry := version.VersionRegistry{Tx: tx}
+			versionRegistry := latestversion.AvailableRegistry{Tx: tx}
 			versionRegistry.Set(avro.ApplicationVersionAvailable{App: "world", Version: "1.2.3"})
 			return nil
 		})
 		db.View(func(tx *bolt.Tx) error {
-			versionRegistry := version.VersionRegistry{Tx: tx}
+			versionRegistry := latestversion.AvailableRegistry{Tx: tx}
 			version, err := versionRegistry.Get("world")
 			Expect(err).To(BeNil())
 			Expect(version.App).To(Equal("world"))

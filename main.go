@@ -12,7 +12,7 @@ import (
 	"syscall"
 
 	flag "github.com/bborbe/flagenv"
-	"github.com/bborbe/kafka-latest-versions/version"
+	"github.com/bborbe/kafka-latest-versions/latestversion"
 	"github.com/golang/glog"
 )
 
@@ -21,19 +21,23 @@ func main() {
 	glog.CopyStandardLogTo("info")
 	runtime.GOMAXPROCS(runtime.NumCPU())
 
-	app := &version.App{}
+	app := &latestversion.App{}
+	flag.IntVar(&app.Port, "port", 9004, "port to listen")
 	flag.StringVar(&app.DataDir, "datadir", "", "data directory")
+	flag.StringVar(&app.KafkaAvailableVersionTopic, "kafka-available-version-topic", "", "kafka topic")
 	flag.StringVar(&app.KafkaBrokers, "kafka-brokers", "", "kafka brokers")
-	flag.StringVar(&app.KafkaTopic, "kafka-topic", "", "kafka topic")
-	flag.IntVar(&app.Port, "port", 9001, "port to listen")
+	flag.StringVar(&app.KafkaLatestVersionTopic, "kafka-latest-version-topic", "", "kafka topic")
+	flag.StringVar(&app.KafkaSchemaRegistryUrl, "kafka-schema-registry-url", "", "kafka schema registry url")
 
 	flag.Set("logtostderr", "true")
 	flag.Parse()
 
-	glog.V(0).Infof("Parameter datadir: %s", app.DataDir)
-	glog.V(0).Infof("Parameter kafka-brokers: %s", app.KafkaBrokers)
-	glog.V(0).Infof("Parameter kafka-topic: %s", app.KafkaTopic)
-	glog.V(0).Infof("Parameter port: %d", app.Port)
+	glog.V(0).Infof("Parameter DataDir: %s", app.DataDir)
+	glog.V(0).Infof("Parameter KafkaAvailableVersionTopic: %s", app.KafkaAvailableVersionTopic)
+	glog.V(0).Infof("Parameter KafkaBrokers: %s", app.KafkaBrokers)
+	glog.V(0).Infof("Parameter KafkaLatestVersionTopic: %s", app.KafkaLatestVersionTopic)
+	glog.V(0).Infof("Parameter KafkaSchemaRegistryUrl: %s", app.KafkaSchemaRegistryUrl)
+	glog.V(0).Infof("Parameter Port: %d", app.Port)
 
 	err := app.Validate()
 	if err != nil {

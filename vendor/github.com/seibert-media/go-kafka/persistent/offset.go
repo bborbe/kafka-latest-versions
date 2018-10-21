@@ -2,27 +2,27 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package version
+package persistent
 
 import (
 	"bytes"
 	"encoding/binary"
 )
 
-type Partition int32
+type Offset int64
 
-func (o Partition) Int32() int32 {
-	return int32(o)
+func (o Offset) Int64() int64 {
+	return int64(o)
 }
 
-func (o Partition) Bytes() []byte {
+func (o Offset) Bytes() []byte {
 	result := &bytes.Buffer{}
-	binary.Write(result, binary.BigEndian, o.Int32())
+	binary.Write(result, binary.BigEndian, o.Int64())
 	return result.Bytes()
 }
 
-func PartitionFromBytes(content []byte) Partition {
-	var result int32
+func OffsetFromBytes(content []byte) Offset {
+	var result int64
 	binary.Read(bytes.NewBuffer(content), binary.BigEndian, &result)
-	return Partition(result)
+	return Offset(result)
 }

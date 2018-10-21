@@ -15,9 +15,14 @@ import (
 	"github.com/pkg/errors"
 )
 
+//go:generate counterfeiter -o ../mocks/http_client.go --fake-name HttpClient . HttpClient
+type HttpClient interface {
+	Do(req *http.Request) (*http.Response, error)
+}
+
 type Registry struct {
 	SchemaRegistryUrl string
-	HttpClient        httpClient
+	HttpClient        HttpClient
 
 	mux   sync.Mutex
 	cache map[string]uint32
@@ -32,7 +37,7 @@ func (s *Registry) SchemaId(subject string, schema string) (uint32, error) {
 	}
 	id, ok := s.cache[schema]
 	if ok {
-		glog.V(2).Infof("cache hit return %d", id)
+		glog.V(3).Infof("cache hit return %d", id)
 		return id, nil
 	}
 	input := struct {
@@ -67,6 +72,6 @@ func (s *Registry) SchemaId(subject string, schema string) (uint32, error) {
 		return 0, errors.New("get id from schema registry failed")
 	}
 	s.cache[schema] = output.Id
-	glog.V(2).Infof("got %d from schema registry", output.Id)
+	glog.V(3).Infof("got %d from schema registry", output.Id)
 	return output.Id, nil
 }

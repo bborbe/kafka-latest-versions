@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package version
+package persistent
 
 import (
 	"github.com/boltdb/bolt"
@@ -10,11 +10,12 @@ import (
 )
 
 type OffsetRegistry struct {
-	Tx *bolt.Tx
+	Tx         *bolt.Tx
+	BucketName []byte
 }
 
 func (o *OffsetRegistry) Get(partition int32) (int64, error) {
-	bucket := o.Tx.Bucket([]byte("offset"))
+	bucket := o.Tx.Bucket(o.BucketName)
 	bytes := bucket.Get(Partition(partition).Bytes())
 	if bytes == nil {
 		return 0, errors.New("get offest failed")
@@ -23,6 +24,6 @@ func (o *OffsetRegistry) Get(partition int32) (int64, error) {
 }
 
 func (o *OffsetRegistry) Set(partition int32, offset int64) error {
-	offsetBucket := o.Tx.Bucket([]byte("offset"))
+	offsetBucket := o.Tx.Bucket(o.BucketName)
 	return offsetBucket.Put(Partition(partition).Bytes(), Offset(offset).Bytes())
 }

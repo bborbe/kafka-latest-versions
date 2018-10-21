@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package version
+package latestversion
 
 import (
 	"bytes"
@@ -13,12 +13,12 @@ import (
 	"github.com/pkg/errors"
 )
 
-type VersionRegistry struct {
+type AvailableRegistry struct {
 	Tx *bolt.Tx
 }
 
-func (v *VersionRegistry) Get(app string) (*avro.ApplicationVersionAvailable, error) {
-	bucket := v.Tx.Bucket([]byte("version"))
+func (a *AvailableRegistry) Get(app string) (*avro.ApplicationVersionAvailable, error) {
+	bucket := a.Tx.Bucket([]byte("version"))
 	buf := bytes.NewBuffer(bucket.Get([]byte(app)))
 	if buf == nil {
 		return nil, fmt.Errorf("not found")
@@ -27,18 +27,22 @@ func (v *VersionRegistry) Get(app string) (*avro.ApplicationVersionAvailable, er
 	return version, errors.Wrap(err, "deserialize version failed")
 }
 
-func (v *VersionRegistry) Set(version avro.ApplicationVersionAvailable) error {
-	bucket := v.Tx.Bucket([]byte("version"))
+func (a *AvailableRegistry) Set(version avro.ApplicationVersionAvailable) error {
+	key := []byte(version.App)
+	if len(key) == 0 {
+		return errors.New("key empty")
+	}
+	bucket := a.Tx.Bucket([]byte("version"))
 	buf := &bytes.Buffer{}
 	if err := version.Serialize(buf); err != nil {
 		return errors.Wrap(err, "serialize version failed")
 	}
-	err := bucket.Put([]byte(version.App), buf.Bytes())
+	err := bucket.Put(key, buf.Bytes())
 	return errors.Wrap(err, "put version failed")
 }
 
-func (v *VersionRegistry) ForEach(fn func(avro.ApplicationVersionAvailable) error) error {
-	bucket := v.Tx.Bucket([]byte("version"))
+func (a *AvailableRegistry) ForEach(fn func(avro.ApplicationVersionAvailable) error) error {
+	bucket := a.Tx.Bucket([]byte("version"))
 	return bucket.ForEach(func(k, v []byte) error {
 		version, err := avro.DeserializeApplicationVersionAvailable(bytes.NewBuffer(v))
 		if err != nil {
