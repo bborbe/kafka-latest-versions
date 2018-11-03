@@ -83,12 +83,18 @@ func (a *App) Run(ctx context.Context) error {
 
 func (a *App) createHttpHandler(db *bolt.DB) http.Handler {
 	router := mux.NewRouter()
+	router.HandleFunc("/healthz", a.check)
+	router.HandleFunc("/readiness", a.check)
 	router.Handle("/metrics", promhttp.Handler())
 	router.Handle("/versions", &AvailableHandler{
 		DB: db,
 	})
 	router.Handle("/", &IndexHandler{})
 	return router
+}
+
+func (a *App) check(resp http.ResponseWriter, req *http.Request) {
+	resp.WriteHeader(http.StatusOK)
 }
 
 func (a *App) createConsumer(db *bolt.DB) (*persistent.Consumer, error) {
