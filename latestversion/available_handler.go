@@ -5,7 +5,7 @@
 package latestversion
 
 import (
-	"fmt"
+	"encoding/json"
 	"net/http"
 
 	"github.com/bborbe/kafka-latest-versions/avro"
@@ -18,18 +18,26 @@ type AvailableHandler struct {
 }
 
 func (a *AvailableHandler) ServeHTTP(resp http.ResponseWriter, req *http.Request) {
-	resp.Header().Set("Content-Type", "text/plain")
-	resp.WriteHeader(http.StatusOK)
+	list := make([]map[string]string, 0)
 	err := a.DB.View(func(tx *bolt.Tx) error {
 		availableRegistry := AvailableRegistry{
 			Tx: tx,
 		}
 		return availableRegistry.ForEach(func(versionAvailable avro.ApplicationVersionAvailable) error {
-			fmt.Fprintf(resp, "%s = %s\n", versionAvailable.App, versionAvailable.Version)
+			list = append(list, map[string]string{
+				"version": versionAvailable.Version,
+				"app":     versionAvailable.App,
+			})
 			return nil
 		})
 	})
 	if err != nil {
 		glog.Warningf("read versions failed: %v", err)
+		http.Error(resp, "read versions failed", http.StatusInternalServerError)
+	}
+	resp.WriteHeader(http.StatusOK)
+	resp.Header().Set("Content-Type", "application/json")
+	if err = json.NewEncoder(resp).Encode(list); err != nil {
+		glog.Warningf("encode json failed: %v", err)
 	}
 }

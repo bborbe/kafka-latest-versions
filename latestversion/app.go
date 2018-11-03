@@ -70,7 +70,9 @@ func (a *App) Run(ctx context.Context) error {
 		go func() {
 			select {
 			case <-ctx.Done():
-				server.Shutdown(ctx)
+				if err := server.Shutdown(ctx); err != nil {
+					glog.Warningf("shutdown failed: %v", err)
+				}
 			}
 		}()
 		return server.ListenAndServe()
@@ -82,9 +84,10 @@ func (a *App) Run(ctx context.Context) error {
 func (a *App) createHttpHandler(db *bolt.DB) http.Handler {
 	router := mux.NewRouter()
 	router.Handle("/metrics", promhttp.Handler())
-	router.Handle("/", &AvailableHandler{
+	router.Handle("/versions", &AvailableHandler{
 		DB: db,
 	})
+	router.Handle("/", &IndexHandler{})
 	return router
 }
 
