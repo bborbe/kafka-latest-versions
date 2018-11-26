@@ -70,9 +70,27 @@ var _ = Describe("MessageHandler", func() {
 		})
 		Expect(err).To(BeNil())
 	})
+	It("doesn't call publish if alpha-number", func() {
+		err := db.Update(func(tx *bolt.Tx) error {
+			err := messageHandler.HandleMessage(tx, buildMessage("Test", "1.0.0-alpha.0"))
+			Expect(err).To(BeNil())
+			Expect(versionPublisher.PublishCallCount()).To(Equal(0))
+			return nil
+		})
+		Expect(err).To(BeNil())
+	})
 	It("doesn't call publish if milestone", func() {
 		err := db.Update(func(tx *bolt.Tx) error {
-			err := messageHandler.HandleMessage(tx, buildMessage("Test", "8.0.0.m0025-eap08"))
+			err := messageHandler.HandleMessage(tx, buildMessage("Test", "1.0.0.m0025-eap08"))
+			Expect(err).To(BeNil())
+			Expect(versionPublisher.PublishCallCount()).To(Equal(0))
+			return nil
+		})
+		Expect(err).To(BeNil())
+	})
+	It("doesn't call publish if eap", func() {
+		err := db.Update(func(tx *bolt.Tx) error {
+			err := messageHandler.HandleMessage(tx, buildMessage("Test", "1.0.0-eap08"))
 			Expect(err).To(BeNil())
 			Expect(versionPublisher.PublishCallCount()).To(Equal(0))
 			return nil
