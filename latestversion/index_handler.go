@@ -18,12 +18,12 @@ func (i *IndexHandler) ServeHTTP(resp http.ResponseWriter, req *http.Request) {
 	fmt.Fprint(resp, `<!DOCTYPE html>
 <html>
 	<head>
-		<title>Latest Versions</title>
+		<title>Versions</title>
 		<script src="https://cdn.jsdelivr.net/npm/vue"></script>
 	</head>
 	<body>
 		<div id="app">
-			<h1>Available Versions</h1>
+			<h1>Versions</h1>
 			<ul>
 				<li v-for="element in list">
 					{{ element.app }} {{ element.version }}  

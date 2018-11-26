@@ -6,7 +6,7 @@ package latestversion
 
 import (
 	"bytes"
-	"strings"
+	"regexp"
 
 	"github.com/Shopify/sarama"
 	"github.com/bborbe/kafka-latest-versions/avro"
@@ -17,11 +17,16 @@ import (
 	"github.com/seibert-media/go-kafka/schema"
 )
 
-type MessageHandler struct {
-	LatestVersionPublisher interface {
-		Publish(avro.ApplicationVersionAvailable) error
-	}
+//go:generate counterfeiter -o ../mocks/version_publisher.go --fake-name VersionPublisher . VersionPublisher
+type VersionPublisher interface {
+	Publish(avro.ApplicationVersionAvailable) error
 }
+
+type MessageHandler struct {
+	LatestVersionPublisher VersionPublisher
+}
+
+var skipVersionsRegex = regexp.MustCompile(`[-\.](beta$|alpha$|m\d+-eap\d+$)`)
 
 func (m *MessageHandler) HandleMessage(tx *bolt.Tx, msg *sarama.ConsumerMessage) error {
 	buf := bytes.NewBuffer(msg.Value)
@@ -32,10 +37,12 @@ func (m *MessageHandler) HandleMessage(tx *bolt.Tx, msg *sarama.ConsumerMessage)
 	if err != nil {
 		return errors.Wrap(err, "deserialize version failed")
 	}
-	if strings.Contains(newVersion.Version, "alpha") || strings.Contains(newVersion.Version, "beta") {
+
+	if skipVersionsRegex.MatchString(newVersion.Version) {
 		glog.V(3).Infof("skip version %s because alpha or beta", newVersion.Version)
 		return nil
 	}
+
 	versionRegistry := AvailableRegistry{
 		Tx: tx,
 	}
