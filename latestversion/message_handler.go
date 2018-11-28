@@ -26,7 +26,7 @@ type MessageHandler struct {
 	LatestVersionPublisher VersionPublisher
 }
 
-var skipVersionsRegex = regexp.MustCompile(`[-\.](beta|alpha|eap)[-\.]?\d*$`)
+var skipVersionsRegex = regexp.MustCompile(`[-\.](beta|alpha|eap|rc)[-\.]?\d*$`)
 
 func (m *MessageHandler) HandleMessage(tx *bolt.Tx, msg *sarama.ConsumerMessage) error {
 	buf := bytes.NewBuffer(msg.Value)

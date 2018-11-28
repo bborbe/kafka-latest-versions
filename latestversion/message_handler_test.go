@@ -97,6 +97,15 @@ var _ = Describe("MessageHandler", func() {
 		})
 		Expect(err).To(BeNil())
 	})
+	It("doesn't call publish if rc", func() {
+		err := db.Update(func(tx *bolt.Tx) error {
+			err := messageHandler.HandleMessage(tx, buildMessage("Test", "v1.13.0-rc.1"))
+			Expect(err).To(BeNil())
+			Expect(versionPublisher.PublishCallCount()).To(Equal(0))
+			return nil
+		})
+		Expect(err).To(BeNil())
+	})
 })
 
 func buildMessage(app string, version string) *sarama.ConsumerMessage {
