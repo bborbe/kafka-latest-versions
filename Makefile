@@ -39,7 +39,7 @@ addlicense:
 check: lint vet errcheck
 
 lint:
-	@go get github.com/golang/lint/golint
+	@go get golang.org/x/lint/golint
 	@golint -min_confidence 1 $(shell go list ./... | grep -v /vendor/)
 
 vet:
