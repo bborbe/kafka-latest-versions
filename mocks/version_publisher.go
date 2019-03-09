@@ -2,10 +2,10 @@
 package mocks
 
 import (
-	sync "sync"
+	"sync"
 
-	avro "github.com/bborbe/kafka-latest-versions/avro"
-	latestversion "github.com/bborbe/kafka-latest-versions/latestversion"
+	"github.com/bborbe/kafka-latest-versions/avro"
+	"github.com/bborbe/kafka-latest-versions/latestversion"
 )
 
 type VersionPublisher struct {
