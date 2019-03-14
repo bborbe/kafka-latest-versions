@@ -12,10 +12,11 @@ import (
 	"os/signal"
 	"path"
 	"runtime"
+	"strings"
 	"syscall"
 
+	"github.com/Shopify/sarama"
 	"github.com/bborbe/argument"
-
 	flag "github.com/bborbe/flagenv"
 	"github.com/bborbe/kafka-latest-versions/latestversion"
 	"github.com/bborbe/run"
@@ -64,7 +65,7 @@ func contextWithSig(ctx context.Context) context.Context {
 }
 
 type application struct {
-	DataDir                    string `required:"true" arg:"datadir" env:"DATADIR" default:"" usage:"data directory"`
+	DataDir                    string `required:"true" arg:"datadir" env:"DATADIR" usage:"data directory"`
 	KafkaAvailableVersionTopic string `required:"true" arg:"kafka-available-version-topic" env:"KAFKA_AVAILABLE_VERSION_TOPIC" usage:"Kafka topic"`
 	KafkaBrokers               string `required:"true" arg:"kafka-brokers" env:"KAFKA_BROKERS" usage:"Kafka brokers"`
 	KafkaLatestVersionTopic    string `required:"true" arg:"kafka-latest-version-topic" env:"KAFKA_LATEST_VERSION_TOPIC" usage:"Kafka topic"`
@@ -109,10 +110,8 @@ func (a *application) createHttpHandler(db *bolt.DB) http.Handler {
 	router.HandleFunc("/healthz", a.check)
 	router.HandleFunc("/readiness", a.check)
 	router.Handle("/metrics", promhttp.Handler())
-	router.Handle("/versions", &latestversion.AvailableHandler{
-		DB: db,
-	})
-	router.Handle("/", &latestversion.IndexHandler{})
+	router.Handle("/versions", latestversion.NewAvailableHandler(db))
+	router.Handle("/", latestversion.NewIndexHandler())
 	return router
 }
 
@@ -137,6 +136,25 @@ func (a *application) createConsumer(db *bolt.DB) func(ctx context.Context) erro
 		if err != nil {
 			return errors.Wrap(err, "create default bolt buckets failed")
 		}
+
+		config := sarama.NewConfig()
+		config.Version = sarama.V2_0_0_0
+		config.Producer.RequiredAcks = sarama.WaitForAll
+		config.Producer.Retry.Max = 10
+		config.Producer.Return.Successes = true
+
+		client, err := sarama.NewClient(strings.Split(a.KafkaBrokers, ","), config)
+		if err != nil {
+			return errors.Wrap(err, "create client failed")
+		}
+		defer client.Close()
+
+		producer, err := sarama.NewSyncProducerFromClient(client)
+		if err != nil {
+			return errors.Wrap(err, "create sync producer failed")
+		}
+		defer producer.Close()
+
 		consumer := &persistent.Consumer{
 			KafkaTopic:   a.KafkaAvailableVersionTopic,
 			KafkaBrokers: a.KafkaBrokers,
@@ -144,8 +162,8 @@ func (a *application) createConsumer(db *bolt.DB) func(ctx context.Context) erro
 				DB: db,
 				MessageHandler: &latestversion.MessageHandler{
 					LatestVersionPublisher: &latestversion.Publisher{
-						KafkaBrokers: a.KafkaBrokers,
-						KafkaTopic:   a.KafkaLatestVersionTopic,
+						Producer:   producer,
+						KafkaTopic: a.KafkaLatestVersionTopic,
 						SchemaRegistry: schema.NewRegistry(
 							http.DefaultClient,
 							a.KafkaSchemaRegistryUrl,

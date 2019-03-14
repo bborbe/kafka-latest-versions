@@ -33,7 +33,7 @@ test:
 
 addlicense:
 	go get github.com/google/addlicense
-	addlicense -c "Benjamin Borbe" -y 2018 -l bsd ./*.go ./latestversion/*.go
+	addlicense -c "Benjamin Borbe" -y 2019 -l bsd ./*.go ./latestversion/*.go
 
 check: lint vet errcheck
 

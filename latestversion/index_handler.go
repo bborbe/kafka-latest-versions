@@ -9,10 +9,14 @@ import (
 	"net/http"
 )
 
-type IndexHandler struct {
+func NewIndexHandler() http.Handler {
+	return &indexHandler{}
 }
 
-func (i *IndexHandler) ServeHTTP(resp http.ResponseWriter, req *http.Request) {
+type indexHandler struct {
+}
+
+func (i *indexHandler) ServeHTTP(resp http.ResponseWriter, req *http.Request) {
 	resp.WriteHeader(http.StatusOK)
 	resp.Header().Set("Content-Type", "text/html")
 	fmt.Fprint(resp, `<!DOCTYPE html>

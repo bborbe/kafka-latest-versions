@@ -13,13 +13,19 @@ import (
 	"github.com/golang/glog"
 )
 
-type AvailableHandler struct {
-	DB *bolt.DB
+func NewAvailableHandler(db *bolt.DB) http.Handler {
+	return &availableHandler{
+		db: db,
+	}
 }
 
-func (a *AvailableHandler) ServeHTTP(resp http.ResponseWriter, req *http.Request) {
+type availableHandler struct {
+	db *bolt.DB
+}
+
+func (a *availableHandler) ServeHTTP(resp http.ResponseWriter, req *http.Request) {
 	list := make([]map[string]string, 0)
-	err := a.DB.View(func(tx *bolt.Tx) error {
+	err := a.db.View(func(tx *bolt.Tx) error {
 		availableRegistry := AvailableRegistry{
 			Tx: tx,
 		}

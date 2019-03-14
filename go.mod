@@ -14,7 +14,7 @@ require (
 	github.com/golang/glog v0.0.0-20160126235308-23def4e6c14b
 	github.com/gorilla/mux v1.7.0
 	github.com/onsi/ginkgo v1.8.0
-	github.com/onsi/gomega v1.4.3
+	github.com/onsi/gomega v1.5.0
 	github.com/pkg/errors v0.8.1
 	github.com/prometheus/client_golang v0.9.2
 	github.com/seibert-media/go-kafka v0.0.0-20190226200402-b82e33ffb705
